@@ -1,5 +1,5 @@
 # NBATopShot Sniping Bot
-This bot is designed to automatically spot interesting moments on livetoken.co and purchase them directly on the NBATopShot website in a fast non-robotic way ! 
+This bot is designed to automatically spot interesting moments on livetoken.co and purchase them directly on the NBATopShot website in a fast and non-robotic way ! 
 
 Requirements: Nodejs & Puppeteer.
 
