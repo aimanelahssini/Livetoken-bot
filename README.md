@@ -1,6 +1,9 @@
 # NBATopShot Sniping Bot
-This b isot designed to automatically spot interesting buy moments on livetoken.co and purchase them directly on NBATopShot in a non-robotic way ! 
+This bot is designed to automatically spot interesting moments on livetoken.co and purchase them directly on the NBATopShot website in a fast non-robotic way ! 
 
-Note: You can change the flame and droplet parameters to tweak the bot.
+Requirements: Nodejs & Puppeteer.
+
+Notes & tweaks: - The flame and droplet parameters can be changed to tweak the bot.
+       - The parameter for the headless browser can also be changed to false to be able to see the browser but it will make the bot slower.
 
 More information coming soon.
