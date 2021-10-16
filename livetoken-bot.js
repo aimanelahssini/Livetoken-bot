@@ -20,6 +20,9 @@ AVOID BOT DETECTION
  5. Use a random timeout where timeouts are used
  6. Headless to false unless you use the Accept-Language case-sensitive (https://news.ycombinator.com/item?id=20479015)
  7. Setting up cookies and local storage data (https://scrapingant.com/blog/puppeteer-tricks-to-avoid-detection-and-make-web-scraping-easier)
+      Use your own logging cookies, to avoid logging in every time you launch the bot
+      Use sessions? (https://www.worthwebscraping.com/how-to-use-cookies-and-session-in-python-web-scraping/)
+
  8. Use stealth plugin (https://www.npmjs.com/package/puppeteer-extra-plugin-stealth)
 
 */
@@ -46,6 +49,7 @@ const browser = await puppeteer.launch({
 async function initBrowser() {
   const browser = await puppeteer.launch({headless: false, args: minimal_args});
   const page = (await browser.pages())[0]; //avoid using newPage, opening a new Chromium tab could lead to bot detection
+  //setup personal cookies (google, livetoken, TS, Dapper)
   await page.goto('https://livetoken.co/deals/live');
   return page;
   //await browser.close()
@@ -64,7 +68,10 @@ async function setupOptions(){
 
 async function goToTS(){
   //2 seconds to setup the flames and droplets
-  //await page.waitForTimeout(2000)
+  await page.waitForTimeout(2000)
+
+  //wait for a certain element to load before clicking on it
+  await page.WaitForSelectorAsync("btn buyButton btn-success btn-sm"); //not sure
   await page.click("button[class='btn buyButton btn-success btn-sm']", elem => elem.click());
   // !NOTE! Be aware of the tab opening
   const tsPage = await page.evaluate("() => window.location.href")
