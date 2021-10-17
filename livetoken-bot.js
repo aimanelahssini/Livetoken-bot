@@ -28,8 +28,8 @@ AVOID BOT DETECTION
 
 */
 
-// Run Puppeteer with Minimal settings
-const puppeteer = require('puppeteer');
+// Run Puppeteer with Minimal settings & Stealth plugin
+const puppeteer = require('puppeteer-extra');
 
 // ! Check minimal args for bot detection
 const minimal_args = [
@@ -43,15 +43,57 @@ const minimal_args = [
 
 ];
 
-const browser = await puppeteer.launch({
-  headless: true,
-  args: minimal_args
-})
+/*
+const minimal_args = [
+  '--autoplay-policy=user-gesture-required',
+  '--disable-background-networking',
+  '--disable-background-timer-throttling',
+  '--disable-backgrounding-occluded-windows',
+  '--disable-breakpad',
+  '--disable-client-side-phishing-detection',
+  '--disable-component-update',
+  '--disable-default-apps',
+  '--disable-dev-shm-usage',
+  '--disable-domain-reliability',
+  '--disable-extensions',
+  '--disable-features=AudioServiceOutOfProcess',
+  '--disable-hang-monitor',
+  '--disable-ipc-flooding-protection',
+  '--disable-notifications',
+  '--disable-offer-store-unmasked-wallet-cards',
+  '--disable-popup-blocking',
+  '--disable-print-preview',
+  '--disable-prompt-on-repost',
+  '--disable-renderer-backgrounding',
+  '--disable-setuid-sandbox',
+  '--disable-speech-api',
+  '--disable-sync',
+  '--hide-scrollbars',
+  '--ignore-gpu-blacklist',
+  '--metrics-recording-only',
+  '--mute-audio',
+  '--no-default-browser-check',
+  '--no-first-run',
+  '--no-pings',
+  '--no-sandbox',
+  '--no-zygote',
+  '--password-store=basic',
+  '--use-gl=swiftshader',
+  '--use-mock-keychain',
+]; */
 
 async function initBrowser() {
   const browser = await puppeteer.launch({headless: false, args: minimal_args});
   const page = (await browser.pages())[0]; //avoid using newPage, opening a new Chromium tab could lead to bot detection
   //setup personal cookies (google, livetoken, TS, Dapper)
+  await page.setRequestInterception(true);
+  page.on('request', (req) => {
+  if(req.resourceType() === 'image'){
+  req.abort();
+  }
+  else {
+  req.continue();
+  }
   await page.goto('https://livetoken.co/deals/live');
   return page;
   //await browser.close()
@@ -96,6 +138,6 @@ async function purchaseOnTS(){
 
 }
 
-initBrowser()
-goToTS()
-purchaseOnTS()
+initBrowser();
+goToTS();
+purchaseOnTS();

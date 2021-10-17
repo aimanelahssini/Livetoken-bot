@@ -1,0 +1,26 @@
+{
+  "name": "livetoken-bot",
+  "version": "1.0.0",
+  "description": "This bot is designed to automatically spot interesting moments on livetoken.co and purchase them directly on the NBATopShot website in a fast and non-robotic way !",
+  "main": "livetoken-bot-test.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Mohamedlahssini/Livetoken-bot.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Mohamedlahssini/Livetoken-bot/issues"
+  },
+  "homepage": "https://github.com/Mohamedlahssini/Livetoken-bot#readme",
+  "dependencies": {
+    "puppeteer": "^10.4.0",
+    "puppeteer-extra": "^3.2.3",
+    "puppeteer-extra-plugin-stealth": "^2.9.0",
+    "random-useragent": "^0.5.0",
+    "user-agents": "^1.0.806"
+  }
+}
