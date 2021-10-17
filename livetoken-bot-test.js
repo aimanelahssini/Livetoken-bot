@@ -38,6 +38,9 @@ const minimal_args = [
   '--password-store=basic',
   '--use-gl=swiftshader',
   '--use-mock-keychain',
+  //'--single-process',
+  '--no-zygote',
+  '--no-sandbox'
 ]; 
 
 async function initBrowser() {
@@ -47,8 +50,26 @@ async function initBrowser() {
     const page = await browser.newPage(); //avoid using newPage, opening a new Chromium tab could lead to bot detection
     //setup personal cookies (google, livetoken, TS, Dapper)
     await page.goto('https://livetoken.co/deals/live');
-    return page;
-    //await browser.close()
+
+    //wait for a certain element to load before clicking on it
+    await page.WaitForSelector("button[class='btn buyButton btn-success btn-sm']", {visible: true}); //not sure
+
+    await page.click("button[class='btn buyButton btn-success btn-sm']", elem => elem.click());
+      // !NOTE! Be aware of the tab opening
+    //const tsPage = await page.evaluate("() => window.location.href")
+    //await page.goto(tsPage);
+    }
+
+    async function goToTS(){
+      //4 seconds to setup the flames and droplets
+      await page.waitForTimeout(4000)
+    
+      //wait for a certain element to load before clicking on it
+      await page.WaitForSelectorAsync("btn buyButton btn-success btn-sm"); //not sure
+      await page.click("button[class='btn buyButton btn-success btn-sm']", elem => elem.click());
+      // !NOTE! Be aware of the tab opening
+      const tsPage = await page.evaluate("() => window.location.href")
+    
     }
 
 initBrowser();

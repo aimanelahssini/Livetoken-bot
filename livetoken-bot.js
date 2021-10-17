@@ -33,18 +33,6 @@ const puppeteer = require('puppeteer-extra');
 
 // ! Check minimal args for bot detection
 const minimal_args = [
-  '--no-sandbox',
-  '--disable-setuid-sandbox',
-  '--disable-infobars',
-  '--window-position=0,0',
-  '--ignore-certifcate-errors',
-  '--ignore-certifcate-errors-spki-list',
-  '--user-agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3312.0 Safari/537.36"' //modification needed
-
-];
-
-/*
-const minimal_args = [
   '--autoplay-policy=user-gesture-required',
   '--disable-background-networking',
   '--disable-background-timer-throttling',
@@ -80,24 +68,18 @@ const minimal_args = [
   '--password-store=basic',
   '--use-gl=swiftshader',
   '--use-mock-keychain',
-]; */
+]; 
 
 async function initBrowser() {
+  const StealthPlugin = require('puppeteer-extra-plugin-stealth');
+  puppeteer.use(StealthPlugin());
   const browser = await puppeteer.launch({headless: false, args: minimal_args});
-  const page = (await browser.pages())[0]; //avoid using newPage, opening a new Chromium tab could lead to bot detection
+  const page = await browser.newPage(); //avoid using newPage, opening a new Chromium tab could lead to bot detection
   //setup personal cookies (google, livetoken, TS, Dapper)
-  await page.setRequestInterception(true);
-  page.on('request', (req) => {
-  if(req.resourceType() === 'image'){
-  req.abort();
-  }
-  else {
-  req.continue();
-  }
   await page.goto('https://livetoken.co/deals/live');
   return page;
   //await browser.close()
-}
+  }
 
 /*
 //setup flames to 3 and droplets to 3
@@ -138,6 +120,3 @@ async function purchaseOnTS(){
 
 }
 
-initBrowser();
-goToTS();
-purchaseOnTS();
