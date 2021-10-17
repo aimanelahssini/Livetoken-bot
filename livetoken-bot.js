@@ -7,6 +7,7 @@ SPEED ENHANCEMENT
  3. Set headless to true
 https://www.scrapehero.com/how-to-increase-web-scraping-speed-using-puppeteer/ 
 https://stackoverflow.com/questions/48773031/how-to-prevent-chrome-headless-from-loading-images
+ 4. Write clean code (https://medium.com/@bretcameron/13-tips-to-write-faster-better-optimized-javascript-dc1f9ab063d8)
 
 */
 
@@ -30,6 +31,7 @@ AVOID BOT DETECTION
 // Run Puppeteer with Minimal settings
 const puppeteer = require('puppeteer');
 
+// ! Check minimal args for bot detection
 const minimal_args = [
   '--no-sandbox',
   '--disable-setuid-sandbox',
