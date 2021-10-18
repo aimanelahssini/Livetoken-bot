@@ -1,5 +1,6 @@
 
 const puppeteer = require('puppeteer-extra');
+const fs = require('fs').promises;
 
 // ! Check minimal args for bot detection
 const minimal_args = [
@@ -38,39 +39,58 @@ const minimal_args = [
   '--password-store=basic',
   '--use-gl=swiftshader',
   '--use-mock-keychain',
-  //'--single-process',
+  '--single-process',
   '--no-zygote',
   '--no-sandbox'
 ]; 
+
+
+
 
 async function initBrowser() {
     const StealthPlugin = require('puppeteer-extra-plugin-stealth');
     puppeteer.use(StealthPlugin());
     const browser = await puppeteer.launch({headless: false, args: minimal_args});
-    const page = await browser.newPage(); //avoid using newPage, opening a new Chromium tab could lead to bot detection
+    var page = await browser.newPage(); //avoid using newPage, opening a new Chromium tab could lead to bot detection
+
+    /*
+    //load my cookies
+    const cookiesString = await fs.readFile('./cookies.json');
+    const cookies = JSON.parse(cookiesString);
+    await page.setCookie(...cookies);
+
+    //load my sessionStorage and localStorage
+    const json = JSON.parse(fs.readFile("./livetoken.json", 'utf8'));
+    await page.evaluate(json => {
+    localStorage.clear();
+    for (let key in json)
+      localStorage.setItem(key, json[key]);
+  }, json);
+    */
+
     //setup personal cookies (google, livetoken, TS, Dapper)
     await page.goto('https://livetoken.co/deals/live');
 
+    //click buy on LiveToken
     //wait for a certain element to load before clicking on it
-    await page.WaitForSelector("button[class='btn buyButton btn-success btn-sm']", {visible: true}); //not sure
-
+    await page.waitForXPath("/html/body/div[2]/div[2]/div/div[2]/div/div/div[2]/div/div/div/div[2]/div/div/div[3]/button", {visible: true}); //not sure
     await page.click("button[class='btn buyButton btn-success btn-sm']", elem => elem.click());
-      // !NOTE! Be aware of the tab opening
-    //const tsPage = await page.evaluate("() => window.location.href")
-    //await page.goto(tsPage);
+    
+    
+    //Redefining the page var to the new tab
+    const [target] = await Promise.all([
+      new Promise(resolve => browser.once('targetcreated', resolve))
+    ]);
+    page = await target.page();
+    await page.bringToFront();
+
+    //click buy on TS
+    await page.waitForXPath("/html/body/div[1]/div[3]/main/div[2]/div/div[3]/div/div[3]/div/button", {visible: true}); //try to remove visible?
+    await page.click("button[class='ButtonBase__StyledButton-sc-1qgxh2e-0 gjCpfL Button__StyledButton-ig3kkl-1 yOxki P2PBuyButton__StyledButtonWithMessage-sc-1hj60ii-0 jGdipa']", elem => elem.click());
+
+
     }
 
-    async function goToTS(){
-      //4 seconds to setup the flames and droplets
-      await page.waitForTimeout(4000)
-    
-      //wait for a certain element to load before clicking on it
-      await page.WaitForSelectorAsync("btn buyButton btn-success btn-sm"); //not sure
-      await page.click("button[class='btn buyButton btn-success btn-sm']", elem => elem.click());
-      // !NOTE! Be aware of the tab opening
-      const tsPage = await page.evaluate("() => window.location.href")
-    
-    }
 
 initBrowser();
 
