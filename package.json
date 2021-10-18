@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/Mohamedlahssini/Livetoken-bot#readme",
   "dependencies": {
+    "dotenv": "^10.0.0",
     "fs": "0.0.1-security",
     "puppeteer": "^10.4.0",
     "puppeteer-extra": "^3.2.3",

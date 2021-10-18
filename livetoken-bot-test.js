@@ -1,9 +1,15 @@
+/*
+  delete
+  "random-useragent": "^0.5.0", //delete?
+  "user-agents": "^1.0.806"
+*/
 
 const puppeteer = require('puppeteer-extra');
-const fs = require('fs').promises;
+require('dotenv').config();
 
 // ! Check minimal args for bot detection
 const minimal_args = [
+  '--disable-gpu',
   '--autoplay-policy=user-gesture-required',
   '--disable-background-networking',
   '--disable-background-timer-throttling',
@@ -39,12 +45,48 @@ const minimal_args = [
   '--password-store=basic',
   '--use-gl=swiftshader',
   '--use-mock-keychain',
-  '--single-process',
+  //'--single-process',
   '--no-zygote',
   '--no-sandbox'
 ]; 
 
 
+
+async function loginGoogleLTTS(page, browser){
+
+  const delay = ms => new Promise(res => setTimeout(res, ms));
+
+  await page.setViewport({ width: 1280, height: 800 });
+  await page.goto("https://livetoken.co/myaccount");
+
+
+  await delay(2000);
+  await page.waitForSelector("#login > a");
+  await page.click("#login > a", elem => elem.click());
+  await page.waitForSelector("#googleBtn", {visible: true});
+  await page.click("#googleBtn");
+
+  //Redefining the page var to the new tab
+  const newPagePromise = new Promise(x => browser.once('targetcreated', target => x(target.page())));	
+  const popup = await newPagePromise;
+
+  await popup.waitForSelector('input[type="email"]', {visible: true});
+  await popup.type('input[type="email"]', process.env.GOOGLE_USER);
+  await popup.click("#identifierNext");
+
+  await popup.waitForSelector('input[type="password"]', {visible: true});
+  await popup.type('input[type="password"]', process.env.GOOGLE_PWD);
+
+  await popup.waitForSelector("#passwordNext > div > button > div.VfPpkd-Jh9lGc", {visible: true});
+  await popup.click("#passwordNext > div > button > div.VfPpkd-Jh9lGc");
+
+  
+  await delay(5000);
+  await page.goto("https://auth.meetdapper.com/login?state=hKFo2SBpV2M1Ujgyc0l1cUpUT19iT1hYZF95U3RfZjk3WF9YMKFupWxvZ2luo3RpZNkgOV81dEhTT1Z2WWFzOFBKMEVjNUttZ015NTcyUDV0MVKjY2lk2SA3NTZLQ3ZpaXU2VkFTMW5iZXRqVWprNjRPY1owWXY4cg&client=756KCviiu6VAS1nbetjUjk64OcZ0Yv8r&protocol=oauth2&access_type=offline&redirect_uri=https%3A%2F%2Fnbatopshot.com%2Fapi%2Fauth0%2Fcallback&response_type=code&scope=openid%20profile%20offline_access%20email");
+  await page.waitForSelector("#root > div > div > div.css-1mvm84l > div.css-12x0iee");
+  await page.click("#root > div > div > div.css-1mvm84l > div.css-12x0iee");
+  await delay(20000);
+}
 
 
 async function initBrowser() {
@@ -53,29 +95,16 @@ async function initBrowser() {
     const browser = await puppeteer.launch({headless: false, args: minimal_args});
     var page = await browser.newPage(); //avoid using newPage, opening a new Chromium tab could lead to bot detection
 
-    /*
-    //load my cookies
-    const cookiesString = await fs.readFile('./cookies.json');
-    const cookies = JSON.parse(cookiesString);
-    await page.setCookie(...cookies);
 
-    //load my sessionStorage and localStorage
-    const json = JSON.parse(fs.readFile("./livetoken.json", 'utf8'));
-    await page.evaluate(json => {
-    localStorage.clear();
-    for (let key in json)
-      localStorage.setItem(key, json[key]);
-  }, json);
-    */
+    //login to Google, LT and TS
+    await loginGoogleLTTS(page, browser);
 
     //setup personal cookies (google, livetoken, TS, Dapper)
     await page.goto('https://livetoken.co/deals/live');
 
     //click buy on LiveToken
-    //wait for a certain element to load before clicking on it
-    await page.waitForXPath("/html/body/div[2]/div[2]/div/div[2]/div/div/div[2]/div/div/div/div[2]/div/div/div[3]/button", {visible: true}); //not sure
+    await page.waitForXPath("/html/body/div[2]/div[2]/div/div[2]/div/div/div[2]/div/div/div/div[2]/div/div/div[3]/button"); //not sure
     await page.click("button[class='btn buyButton btn-success btn-sm']", elem => elem.click());
-    
     
     //Redefining the page var to the new tab
     const [target] = await Promise.all([
@@ -84,9 +113,23 @@ async function initBrowser() {
     page = await target.page();
     await page.bringToFront();
 
-    //click buy on TS
-    await page.waitForXPath("/html/body/div[1]/div[3]/main/div[2]/div/div[3]/div/div[3]/div/button", {visible: true}); //try to remove visible?
-    await page.click("button[class='ButtonBase__StyledButton-sc-1qgxh2e-0 gjCpfL Button__StyledButton-ig3kkl-1 yOxki P2PBuyButton__StyledButtonWithMessage-sc-1hj60ii-0 jGdipa']", elem => elem.click());
+    //click buy on Top Shot
+    await page.waitForXPath("/html/body/div[1]/div[3]/main/div[2]/div/div[3]/div/div[3]/div/button"/*, {visible: true} */); //try to remove visible?
+    await page.click("button[class='ButtonBase__StyledButton-sc-1qgxh2e-0 gjCpfL Button__StyledButton-ig3kkl-1 yOxki P2PBuyButton__StyledButtonWithMessage-sc-1hj60ii-0 jGdipa']");
+    await page.click("#__next > div.AppTemplate__Wrapper-d5brw1-1.kvEiEU > main > div.MomentDetailed__HeaderWrapper-sc-5jlx8i-0.kbLqCz > div > div.MomentDetailed__HeaderInsert-sc-5jlx8i-6.kUeIEt > div > div.MintedHeaderInsert__BuyUIWrapper-sc-85mwfw-1.bTdwyU > div > button");
+
+    //check if making a function of this would make the script faster or slower
+    //Redefining the page var to the new tab
+    [target] = await Promise.all([
+      new Promise(resolve => browser.once('targetcreated', resolve))
+    ]);
+    page = await target.page();
+    await page.bringToFront();
+
+    //click buy on Dapper
+    await page.waitForSelector("#__next > main > div > main > div.css-10u1lvi > div.css-jqhguc > div.css-1gyhwz1 > button.css-wae9sn"/*, {visible: true} */); //try to remove visible?
+    await page.click("#__next > main > div > main > div.css-10u1lvi > div.css-jqhguc > div.css-1gyhwz1 > button.css-wae9sn']");
+    await page.click("#__next > div.AppTemplate__Wrapper-d5brw1-1.kvEiEU > main > div.MomentDetailed__HeaderWrapper-sc-5jlx8i-0.kbLqCz > div > div.MomentDetailed__HeaderInsert-sc-5jlx8i-6.kUeIEt > div > div.MintedHeaderInsert__BuyUIWrapper-sc-85mwfw-1.bTdwyU > div > button");
 
 
     }
