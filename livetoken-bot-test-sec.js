@@ -62,6 +62,29 @@ async function initPage(browser){
 }
 
 
+async function secOptions(page){
+  // evaluate XPath expression of the target selector (it return array of ElementHandle)
+  let elHandle = await page.$x("/html/body/div[2]/div[2]/div/div[2]/div/div/div[2]/div/div/div/div[2]/div/div/div[9]/div");
+  // prepare to get the textContent of the selector above (use page.evaluate)
+  let sec = await page.evaluate(el => el.textContent, elHandle[0]);
+  sec = await sec.substring(0,2);
+  
+
+  if(sec !== '1m' && sec !== '2m' && sec < 32) {
+    console.log('Bingo! ' + sec);
+    //click buy on LiveToken
+    await page.waitForXPath("/html/body/div[2]/div[2]/div/div[2]/div/div/div[2]/div/div/div/div[2]/div/div/div[3]/button");
+    await page.click("button[class='btn buyButton btn-success btn-sm']", elem => elem.click());
+    //add another thread where buying the moment will continue
+    //continue on this thread to snipe more moments at the same time
+    //keep adding threads for every moment under 32 
+  } else {
+    //wait 1sec and reiterate
+    console.log("Too late! " + sec);
+    secOptions(page);
+  };
+};
+
 async function initBrowser() { 
     const StealthPlugin = require('puppeteer-extra-plugin-stealth');
     puppeteer.use(StealthPlugin());
@@ -72,25 +95,7 @@ async function initBrowser() {
     await page.goto('https://livetoken.co/deals/live');
     // wait for XPath to load
     await page.waitForXPath("/html/body/div[2]/div[2]/div/div[2]/div/div/div[2]/div/div/div/div[2]/div/div/div[9]/div"); //not sure
-    // evaluate XPath expression of the target selector (it return array of ElementHandle)
-    let elHandle = await page.$x("/html/body/div[2]/div[2]/div/div[2]/div/div/div[2]/div/div/div/div[2]/div/div/div[9]/div");
-    // prepare to get the textContent of the selector above (use page.evaluate)
-    let sec = await page.evaluate(el => el.textContent, elHandle[0]);
-    sec = await sec.substring(0,2);
-    console.log(sec);
-    
-    if(sec !== '1m' && sec !== '2m') {
-      //wait 1sec and reiterate
-    } else if(sec < 32) { //switch if with else if for faster snipes?
-      //click buy on LiveToken
-      await page.waitForXPath("/html/body/div[2]/div[2]/div/div[2]/div/div/div[2]/div/div/div/div[2]/div/div/div[3]/button");
-      await page.click("button[class='btn buyButton btn-success btn-sm']", elem => elem.click());
-      //add another thread where buying the moment will continue
-      //continue on this thread to snipe more moments at the same time
-      //keep adding threads for every moment under 32 
-    } else {
-      //wait 1sec and reiterate
-    }
+    secOptions(page);
 
     //Redefining the page var to the new tab
     page = await initPage(browser);
