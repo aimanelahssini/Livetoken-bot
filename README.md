@@ -10,3 +10,5 @@ IMPORTANT:
        - Don't forget to create a .env file where you set the GOOGLE_USER and GOOGLE_PWD for automatic login.
 
 More information coming soon.
+
+//try and reproduce the same bot in C++ https://web.archive.org/web/20180324192118/http://benchmarksgame.alioth.debian.org/u64q/compare.php?lang=node&lang2=gpp
