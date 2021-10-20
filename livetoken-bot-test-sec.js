@@ -2,6 +2,9 @@
   delete
   "random-useragent": "^0.5.0", //delete?
   "user-agents": "^1.0.806"
+  
+  const AdblockerPlugin = require('puppeteer-extra-plugin-adblocker')
+  puppeteer.use(AdblockerPlugin({ blockTrackers: true }))
 */
 
 const puppeteer = require('puppeteer-extra');
